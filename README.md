@@ -1,4 +1,8 @@
 capistrano-recipes
 ==================
 
-Default capistrano recipes used in some of our applications. 
+Default capistrano recipes used in some of our applications. Some
+grabbed from railscasts and other repos, some home-made, and customized.
+
+Intented to used as a git submodule.
+
