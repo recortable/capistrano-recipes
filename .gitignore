@@ -1,3 +1,5 @@
+config.yml
+
 *.gem
 *.rbc
 .bundle

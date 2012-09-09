@@ -1,0 +1,5 @@
+application_name: 'Test'
+repository: 'recortable/Recortable'
+server_ip: '1.2.3.4'
+nginx_server_names: 'example.com'
+
