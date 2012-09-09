@@ -4,7 +4,7 @@ upstream <%= upstream %> {
 
 server {
   listen 80;
-  server_name <%= server_names %>
+  server_name <%= server_names %>;
   root <%= current_path %>/public;
 
   location ^~ /assets/ {
