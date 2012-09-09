@@ -4,7 +4,7 @@ upstream <%= upstream %> {
 
 server {
   listen 80;
-  server_name <%= server_name %>
+  server_name <%= server_names %>
   root <%= current_path %>/public;
 
   location ^~ /assets/ {
@@ -13,13 +13,14 @@ server {
   add_header Cache-Control public;
   }
 
-  # CACHE
-  if (-f $document_root/cache/$uri/index.html) {
-    rewrite (.*) /cache/$1/index.html break;
-  }
-  if (-f $document_root/cache/$uri.html) {
-    rewrite (.*) /cache/$1.html break;
-  }
+  <% if nginx_page_caching %>
+    if (-f $document_root/cache/$uri/index.html) {
+      rewrite (.*) /cache/$1/index.html break;
+    }
+    if (-f $document_root/cache/$uri.html) {
+      rewrite (.*) /cache/$1.html break;
+    }
+  <% end %>
 
 
   try_files $uri/index.html $uri @<%= upstream %>;

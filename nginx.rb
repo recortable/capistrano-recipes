@@ -1,5 +1,7 @@
 set_default(:upstream) { application.downcase }
-set_default(:server_name) { throw Exception.new("'set :server_name, \'server.com\'' is mandatory") }
+set_default(:server_names) { throw Exception.new('set server_names, "names" # in your config file') }
+set_default(:nginx_page_caching) { false }
+
 
 namespace :nginx do
   desc "Install latest stable release of nginx"
