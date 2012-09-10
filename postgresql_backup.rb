@@ -1,5 +1,5 @@
 namespace :db do
-  desc "Backup the database"
+  desc "Backup the production database"
   task :backup, :roles => :db do
     run "mkdir -p #{current_path}/backups"
     run "cd #{current_path}; pg_dump -U #{user} #{application}_production -f backups/#{Time.now.utc.strftime('%Y%m%d%H%M%S')}.sql"
@@ -41,6 +41,17 @@ namespace :db do
     file  = "#{application}.sql.bz2"
     puts depackage = "bzcat tmp/#{file} | psql -U#{development['username']} Despachodepan"
     `#{depackage}`
+  end
+
+  namespace :local do
+    desc "Backup the local database"
+    task :dump, roles: :db do
+      db = YAML::load(ERB.new(IO.read(File.join(File.dirname(__FILE__), '../database.yml'))).result)
+      db = db['development']
+      dump = "pg_dump -U#{db['username']} #{db['database']} -f tmp/db.dump.sql"
+      puts dump
+      `#{dump}`
+    end
   end
 end
 
