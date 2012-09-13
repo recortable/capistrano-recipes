@@ -2,7 +2,6 @@ set_required(:newrelic_license_key)
 set_default(:newrelic_app_name) { application }
 
 namespace :newrelic do
-
   desc "Setup newrelic configuration for this application"
   task :setup, roles: :web do
     run "mkdir -p #{shared_path}/config"

@@ -48,7 +48,7 @@ namespace :db do
     task :dump, roles: :db do
       db = YAML::load(ERB.new(IO.read(File.join(File.dirname(__FILE__), '../database.yml'))).result)
       db = db['development']
-      dump = "pg_dump -U#{db['username']} #{db['database']} -f tmp/db.dump.sql"
+      dump = "pg_dump --clean --no-owner --no-privileges -U#{db['username']} #{db['database']} -f tmp/db.dump.sql"
       puts dump
       `#{dump}`
     end
@@ -60,6 +60,31 @@ namespace :db do
       load_cmd = "cat tmp/db.dump.sql | psql -U#{db['username']} #{db['database']}"
       puts load_cmd
       `#{load_cmd}`
+    end
+
+    desc "Push the local database into production"
+    task :push, roles: :db do
+      db = YAML::load(ERB.new(IO.read(File.join(File.dirname(__FILE__), '../database.yml'))).result)
+      dev = db['development']
+      prod = db['production']
+
+      puts "THIS WILL DESTROY THE PRODUCTION DATA!!!"
+      name = Capistrano::CLI.ui.ask("PLEASE CONFIRM. Production database name: ")
+      if name == prod['database']
+        filename = "db.dump.#{Time.now.to_i}.sql"
+        puts dump = "pg_dump --clean --no-owner --no-privileges -U#{dev['username']} #{dev['database']} -f tmp/#{filename}"
+        `#{dump}`
+
+        upload "tmp/#{filename}", "#{shared_path}/#{filename}"
+        run "cat #{shared_path}/#{filename} | psql -U#{prod['username']} #{prod['database']}"  do |ch, stream, out|
+          ch.send_data "#{prod['password']}\n" if out =~ /^Password:/
+          puts out
+        end
+        run "rm #{shared_path}/#{filename}"
+        #`rm tmp/#{filename}`
+      else
+        puts "Doesn't match #{name} <=> #{prod['database']}"
+      end
     end
   end
 end
