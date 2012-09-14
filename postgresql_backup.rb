@@ -28,7 +28,7 @@ namespace :db do
     puts rsync = "rsync #{user}@masqueunacasa.net:#{file} tmp"
     `#{rsync}`
     development = db['development']
-    puts depackage = "bzcat tmp/#{file} | psql -U#{development['username']} Despachodepan"
+    puts depackage = "bzcat tmp/#{file} | psql -U#{development['username']} #{development['database']}"
     `#{depackage}`
   end
 
@@ -39,7 +39,7 @@ namespace :db do
     #puts destroy_db = "rake db:drop db:create"
     #`#{destroy_db}`
     file  = "#{application}.sql.bz2"
-    puts depackage = "bzcat tmp/#{file} | psql -U#{development['username']} Despachodepan"
+    puts depackage = "bzcat tmp/#{file} | psql -U#{development['username']} #{development['database']}"
     `#{depackage}`
   end
 
@@ -71,17 +71,17 @@ namespace :db do
       puts "THIS WILL DESTROY THE PRODUCTION DATA!!!"
       name = Capistrano::CLI.ui.ask("PLEASE CONFIRM. Production database name: ")
       if name == prod['database']
-        filename = "db.dump.#{Time.now.to_i}.sql"
-        puts dump = "pg_dump --clean --no-owner --no-privileges -U#{dev['username']} #{dev['database']} -f tmp/#{filename}"
+        filename = "db.dump.#{Time.now.to_i}.sql.bz2"
+        puts dump = "pg_dump --clean --no-owner --no-privileges -U#{dev['username']} #{dev['database']} | bzip2 > tmp/#{filename}"
         `#{dump}`
 
         upload "tmp/#{filename}", "#{shared_path}/#{filename}"
-        run "cat #{shared_path}/#{filename} | psql -U#{prod['username']} #{prod['database']}"  do |ch, stream, out|
+        run "bzcat #{shared_path}/#{filename} | psql -U#{prod['username']} #{prod['database']}"  do |ch, stream, out|
           ch.send_data "#{prod['password']}\n" if out =~ /^Password:/
           puts out
         end
         run "rm #{shared_path}/#{filename}"
-        #`rm tmp/#{filename}`
+        `rm tmp/#{filename}`
       else
         puts "Doesn't match #{name} <=> #{prod['database']}"
       end

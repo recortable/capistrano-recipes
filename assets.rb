@@ -1,4 +1,5 @@
 set_default(:assets_dependencies) { %w(app/assets lib/assets vendor/assets Gemfile.lock ) } #config/routes.rb) }
+set_default(:asset_env) { "RAILS_GROUP=assets" }
 
 namespace :assets do
   desc <<-DESC
@@ -19,5 +20,10 @@ namespace :assets do
     else
       logger.info "Skipping asset pre-compilation because there were no asset changes"
     end
+  end
+
+  task :force_precompilation, roles: :web, except: {no_release: true} do
+    from = source.next_revision(current_revision)
+    run %Q{cd #{latest_release} && #{rake} RAILS_ENV=#{rails_env} #{asset_env} assets:precompile}
   end
 end
