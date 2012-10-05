@@ -20,6 +20,12 @@ namespace :nginx do
     restart
   end
   after "deploy:setup", "nginx:setup"
+
+  desc "Upload custom nginx configuration"
+  task :custom, roles: :web do
+    upload "config/nginx.conf", "/etc/nginx/sites-enabled/#{application}"
+    restart
+  end
   
   %w[start stop restart].each do |command|
     desc "#{command} nginx"
