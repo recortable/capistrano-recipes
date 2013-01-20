@@ -54,7 +54,7 @@ namespace :db do
     end
 
     desc "Load dump into local database"
-    task :load, roles: :db do
+    task :load_dump, roles: :db do
       db = YAML::load(ERB.new(IO.read(File.join(File.dirname(__FILE__), '../database.yml'))).result)
       db = db['development']
       load_cmd = "cat tmp/db.dump.sql | psql -U#{db['username']} #{db['database']}"

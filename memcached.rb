@@ -1,28 +1,24 @@
+set_default :memcached_memory_limit, 64
+
 namespace :memcached do
-
-  desc "Start memcached"
-  task :start, :roles => [:app], :only => {:memcached => true} do
-    sudo "/etc/init.d/memcached start"
+  desc "Install Memcached"
+  task :install, roles: :app do
+    run "#{sudo} apt-get install memcached"
   end
+  after "deploy:install", "memcached:install"
 
-  desc "Stop memcached"
-  task :stop, :roles => [:app], :only => {:memcached => true} do
-    sudo "/etc/init.d/memcached stop"
+  desc "Setup Memcached"
+  task :setup, roles: :app do
+    template "memcached.erb", "/tmp/memcached.conf"
+    run "#{sudo} mv /tmp/memcached.conf /etc/memcached.conf"
+    restart
   end
+  after "deploy:setup", "memcached:setup"
 
-  desc "Restart memcached"
-  task :restart, :roles => [:app], :only => {:memcached => true} do
-    sudo "/etc/init.d/memcached restart"
+  %w[start stop restart].each do |command|
+    desc "#{command} Memcached"
+    task command, roles: :app do
+      run "#{sudo} service memcached #{command}"
+    end
   end
-
-  desc "Flush memcached - this assumes memcached is on port 11211"
-  task :flush, :roles => [:app], :only => {:memcached => true} do
-    sudo "echo 'flush_all' | nc -q 1 localhost 11211"
-  end
-
-  desc "Symlink the memcached.yml file into place if it exists"
-  task :symlink_configs, :roles => [:app], :only => {:memcached => true }, :except => { :no_release => true } do
-    run "if [ -f #{shared_path}/config/memcached.yml ]; then ln -nfs #{shared_path}/config/memcached.yml #{latest_release}/config/memcached.yml; fi"
-  end
-
 end

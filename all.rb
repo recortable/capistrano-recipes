@@ -12,4 +12,4 @@ load "config/recipes/log"
 load "config/recipes/apt"
 load "config/recipes/sitemap"
 load "config/recipes/redis"
-
+load "config/recipes/memcached"
