@@ -25,7 +25,7 @@ namespace :db do
       ch.send_data "#{production['password']}\n" if out =~ /^Password:/
       puts out
     end
-    puts rsync = "rsync #{user}@masqueunacasa.net:#{file} tmp"
+    puts rsync = "rsync #{user}@#{host}:#{file} tmp"
     `#{rsync}`
     development = db['development']
     puts depackage = "bzcat tmp/#{file} | psql -U#{development['username']} #{development['database']}"
